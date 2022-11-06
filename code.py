@@ -6,11 +6,16 @@ import sys
 gd = eve.Gameduino()
 gd.init()
 
-sleeptime = .5
-afterboot = 2
+warningtime = 1
+sleeptime = .3
+afterboot = 1
+
 boottxt = "Loading.."
+
 global displaylogo
 displaylogo = False
+
+warnings = []
 
 autorun = ""
 osname = ""
@@ -80,8 +85,10 @@ def Boot():
         global osname
         global osver
         boottxt = "Loading /boot/deviceinfo file...Complete"
-        devinfo = open("/sd/boot/deviceinfo", "rt")
-        devinfo = devinfo.read()
+        global devinfo
+        devinfof = open("/sd/boot/deviceinfo", "rt")
+        devinfo = devinfof.read()
+        devinfof.close()
         devinfo = devinfo.split(",")
         osname = devinfo[0]
         osver = devinfo[1]
@@ -93,10 +100,33 @@ def Boot():
         return -2
 
     time.sleep(sleeptime)
+    boottxt = "Loading kernelinfo..."
+    BootScreenUpdate()
+    time.sleep(sleeptime)
+
+    dirinfo = os.listdir("/")
+    if 'kernelinfo' in dirinfo:
+        boottxt = "Loading kernelinfo...Complete"
+        global devinfo
+        kernelinfof = open("/kernelinfo", "rt")
+        kernelinfo = kernelinfof.read()
+        kernelinfof.close()
+        kernelinfo = kernelinfo.split(",")
+        if kernelinfo[0] != devinfo[2]:
+            warnings.append("KERNEL MISMATCH -- MIGHT NOT BE COMPATIBLE")
+        if kernelinfo[1] != devinfo[3]:
+            warnings.append("VERSION MISMATCH -- MIGHT NOT BE COMPATIBLE")
+        BootScreenUpdate()
+    else:
+        BootError("Kernel Info could not be found.", "-3")
+        return -3
+
+    time.sleep(sleeptime)
     boottxt = "Loading /boot/logo.png file..."
     BootScreenUpdate()
     time.sleep(sleeptime)
 
+    dirinfo = os.listdir("/sd/boot")
     if 'logo.png' in dirinfo:
         boottxt = "Loading /boot/logo.png file...Complete"
         global displaylogo
@@ -126,6 +156,12 @@ def Boot():
     else:
         BootError("Autorun file could not be found.", "-2")
         return -3
+
+    for i in warnings:
+        global warningtime
+        boottxt = i
+        BootScreenUpdate()
+        time.sleep(warningtime)
 
     time.sleep(sleeptime)
     boottxt = "Done"
