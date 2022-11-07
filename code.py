@@ -63,20 +63,20 @@ def Boot():
         return -1
 
     time.sleep(sleeptime)
-    boottxt = "Detecting /boot directory"
+    boottxt = "Detecting /sd/boot directory"
     BootScreenUpdate()
     time.sleep(sleeptime)
 
     dirinfo = os.listdir("/sd")
     if 'boot' in dirinfo:
-        boottxt = "Detecting /boot directory...Complete"
+        boottxt = "Detecting /sd/boot directory...Complete"
         BootScreenUpdate()
     else:
-        BootError("/boot doesn't exist.", "-1")
+        BootError("/sd/boot doesn't exist.", "-1")
         return -1
 
     time.sleep(sleeptime)
-    boottxt = "Loading /boot/deviceinfo file..."
+    boottxt = "Loading /sd/boot/deviceinfo file..."
     BootScreenUpdate()
     time.sleep(sleeptime)
 
@@ -84,7 +84,7 @@ def Boot():
     if 'deviceinfo' in dirinfo:
         global osname
         global osver
-        boottxt = "Loading /boot/deviceinfo file...Complete"
+        boottxt = "Loading /sd/boot/deviceinfo file...Complete"
         global devinfo
         devinfof = open("/sd/boot/deviceinfo", "rt")
         devinfo = devinfof.read()
@@ -122,13 +122,13 @@ def Boot():
         return -3
 
     time.sleep(sleeptime)
-    boottxt = "Loading /boot/logo.png file..."
+    boottxt = "Loading /sd/boot/logo.png file..."
     BootScreenUpdate()
     time.sleep(sleeptime)
 
     dirinfo = os.listdir("/sd/boot")
     if 'logo.png' in dirinfo:
-        boottxt = "Loading /boot/logo.png file...Complete"
+        boottxt = "Loading /sd/boot/logo.png file...Complete"
         global displaylogo
         displaylogo = True
         logo = open("/sd/boot/logo.png", "rb")
@@ -138,17 +138,17 @@ def Boot():
         BootScreenUpdate()
 
     else:
-        boottxt = "Loading /boot/logo.png file...Failed"
+        boottxt = "Loading /sd/boot/logo.png file...Failed"
         BootScreenUpdate()
 
     time.sleep(sleeptime)
-    boottxt = "Loading /boot/autorun.py/mpy file..."
+    boottxt = "Loading /sd/boot/autorun.py/mpy file..."
     BootScreenUpdate()
     time.sleep(sleeptime)
 
     dirinfo = os.listdir("/sd/boot")
     if 'autorun.py' in dirinfo or 'autorun.mpy' in dirinfo:
-        boottxt = "Loading /boot/autorun.py/mpy file...Complete"
+        boottxt = "Loading /sd/boot/autorun.py/mpy file...Complete"
         sys.path.insert('1', "/sd")
         global autorun
         import boot.autorun as autorun
@@ -171,7 +171,8 @@ def Boot():
 
 bootreturn = Boot()
 if(bootreturn == 0):
-    autorun.PRG_INIT(gd)
+    global devinfo
+    autorun.PRG_INIT(gd, devinfo)
 
 # Stop from looping
 while True:
