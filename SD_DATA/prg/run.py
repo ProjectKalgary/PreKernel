@@ -7,7 +7,7 @@ def PRG_INIT(gd, dev, args):
         return
     elif args[1] + ".py" in os.listdir() or args[1] + ".mpy" in os.listdir():
         file = os.getcwd().replace("/", ".") + "." + args[1]
-        file = file.lstrip(file[0:4])
+        file = file[4:]
         try:
             a = args
             del a[0]
